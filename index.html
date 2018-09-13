@@ -1,0 +1,56 @@
+<html>
+
+<head>
+    <title>Tchat</title>
+    <style>
+        mark.pseudo {background-color: black; color:white; font-weight: bold}
+    </style>
+</head>
+
+<body>
+    <h1>Le super Chat temps reel !</h1>
+    <form>
+        <input type="text" name="message" id="message" autofocus="true" placeholder="Votre message..." />
+        <input type="button" value="Envoyer" onclick="sendMessage();" />
+    </form>
+    <div id="chatZone"></div>
+
+
+    <!-- partie script -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+        var socket = io();
+        var pseudo;
+
+        // on recupere le nom de l'utilisateur
+        pseudo = window.prompt("Veuillez entrez votre pseudo :");
+        // puis previens les autres utilsiateurs de notre connexion
+        socket.emit('new joiner', pseudo);
+
+
+        // fonction de notification des novuelles connexions
+        socket.on('new joiner', function (pseudo) {
+            //alert(pseudo + " a rejoint le chat")
+            $("#chatZone").prepend("<p><i>" + pseudo + " a rejoint le chat</i></p>");
+        });
+
+        // fonction de reception des messages
+        socket.on('chat message', function ({ pseudo, message }) {
+            //alert("message reçu de " + pseudo + " : " + message)
+            $("#chatZone").prepend("<p><mark class='pseudo'>" + pseudo + "</mark> " + message + "</p>");
+        });
+
+        // fonction d'envoi un message sur le tchat
+        function sendMessage() {
+            var message = document.getElementById('message').value
+            socket.emit('chat message', { pseudo: pseudo, message: message });
+            // puis on vide le champs message
+            document.getElementById('message').value = ""
+        }
+        
+    </script>
+
+</body>
+
+</html>
